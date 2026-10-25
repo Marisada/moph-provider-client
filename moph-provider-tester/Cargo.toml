@@ -1,0 +1,50 @@
+[workspace]
+members = [ "backend", "frontend" ]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.5"
+rust-version = "1.93"
+edition = "2024"
+authors = ["Marisada Pitakthum <p.marisada@gmail.com>"]
+description = "Dominator + Axum Web Application for testing with Provider ID"
+license = "MIT"
+repository = "https://github.com/Marisada/moph-provider-client/moph-provider-tester"
+keywords = []
+
+[workspace.dependencies]
+moph-provider-client = { path = "../" }
+
+dominator = "0.5"
+futures = "0.3"
+futures-signals = "0.3"
+js-sys = "0.3"
+log = "0.4"
+serde = "1"
+serde_derive = "1"
+serde_json = "1"
+serde-wasm-bindgen = "0.6"
+time = "0.3"
+ulid = "3"
+wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = [
+    "AbortController",
+    "AbortSignal",
+    "console",
+    "Headers",
+    "Request", 
+    "RequestInit", 
+    "Response", 
+    "Url", 
+    "Window"
+]}
+
+[profile.release]
+lto = true
+opt-level = 'z'
+incremental = false
+panic = "abort"
+debug = false
+codegen-units = 1
+strip = true

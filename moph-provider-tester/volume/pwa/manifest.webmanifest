@@ -1,0 +1,15 @@
+{
+    "name": "Domimator-Axum Tester",
+    "short_name": "Dom-Axum",
+    "id": "DOM-AXUM",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#222",
+    "theme_color": "#222",
+    "description": "TESTER",
+    "dir": "ltr",
+    "lang": "th-TH",
+    "orientation": "portrait-primary",
+    "icons": []
+}

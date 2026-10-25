@@ -1,0 +1,24 @@
+[package]
+name = "backend"
+version = { workspace = true }
+edition = { workspace = true }
+authors = { workspace = true }
+description = { workspace = true }
+repository = { workspace = true }
+keywords = { workspace = true }
+license = { workspace = true }
+readme = "README.md"
+
+[dependencies]
+
+# this crate only
+axum = "0.8"
+tokio = { version = "1", features = [ "full" ]}
+tower-http = { version = "0.7", features = [ "fs", "compression-br", "compression-gzip", "set-header", "trace", "timeout" ] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = [ "time", "env-filter" ] }
+
+# from workspace
+moph-provider-client = { workspace = true }
+time = { workspace = true }
+ulid = { workspace = true }
