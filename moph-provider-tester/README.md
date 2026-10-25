@@ -1,12 +1,12 @@
-# MOPH ProviderID Client tester
+# MOPH Provider ID Client tester
 
-## Preparing
+## Edit credentials
 1. Copy `/backend/src/credentials-empty` to `/backend/src/credentials`
 2. Fill `/backend/src/credentials/health-id-client.txt` with Health ID's `client-id`
 3. Fill `/backend/src/credentials/health-id-secret.txt` with Health ID's `secret-key` 
 4. Fill `/backend/src/credentials/provider-id-client.txt` with Provider ID's `client-id`
 5. Fill `/backend/src/credentials/provider-id-secret.txt` with Provider ID's `secret-key` 
-6. (Optional) change parsing mode at `/backend/src/main.rs:47`
+6. (OPTIONAL) change parsing mode at `/backend/src/main.rs:47`
     - `fast`: find only `access_token` and `hash_cid` from response
     - `full`: parse all response to structure 
 
