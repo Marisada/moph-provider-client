@@ -78,7 +78,7 @@ fn index() -> Dom {
                         .style("height","40px")
                     }),
                     html!("span", {
-                        .style("vertical-align","center")
+                        .style("vertical-align","middle")
                         .text("เข้าใช้งานด้วย Provider ID")
                     }),
                 ])
@@ -101,7 +101,7 @@ fn index() -> Dom {
                         .style("height","40px")
                     }),
                     html!("span", {
-                        .style("vertical-align","center")
+                        .style("vertical-align","middle")
                         .text("เข้าใช้งานด้วย Provider ID + State")
                     }),
                 ])
