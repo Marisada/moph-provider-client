@@ -20,6 +20,12 @@ This library follow [คู่มือการเชื่อมต่อร�
     use std::{collections::HashSet, sync::Arc};
     use tokio::sync::Mutex;
 
+    #[derive(Clone)]
+    pub struct AppState {
+        pub client: Arc<MophProviderIdClient>,
+        pub nonce_set: Arc<Mutex<HashSet<String>>>,
+    }
+
     let client = MophProviderIdClient::builder()
         .redirect_uri("http://localhost:8088/provider")
         .health_id_client("012345-67890")
@@ -29,7 +35,7 @@ This library follow [คู่มือการเชื่อมต่อร�
         .build()
         .unwrap()
     let nonce_set = Arc::new(Mutex::new(HashSet::new()));
-    let state = AppState {client, nonce_set};
+    let app = AppState {client, nonce_set};
     ```
 
 2. Serve OAUTH URI to client (example using axum) or Client using static URI without nonce
@@ -39,12 +45,13 @@ This library follow [คู่มือการเชื่อมต่อร�
     use crate::AppState;
 
     // GET /api/oauth-uri
-    pub async fn get_oauth_uri_with_nonce_handler(State(state): State<crate::AppState>) -> String {
+    pub async fn get_oauth_uri_with_nonce_handler(State(app): State<AppState>) -> String {
         // // you can generate URI without nonce
-        // let uri = state.client.generate_oauth_uri();
+        // let uri = app.client.generate_oauth_uri();
         // // or with nonce
-        let (uri, nonce) = state.client.generate_oauth_uri_with_state();
-        state.nonce_set.lock().await.insert(nonce);
+        let nonce = "RANDOM_TEXT";
+        let uri = app.client.generate_oauth_uri_with_state(nonce);
+        app.nonce_set.lock().await.insert(nonce.to_owned());
         uri
     }
     ```
@@ -58,17 +65,18 @@ This library follow [คู่มือการเชื่อมต่อร�
         ```rust
         use axum::{extract::{Query, State}, response::Redirect};
         use moph_provider_client::request::OauthRedirectParams;
+        use crate::AppState;
 
         // GET /provider
         pub async fn provider_auth(
             Query(params): Query<OauthRedirectParams>,
-            State(state): State<crate::AppState>,
+            State(app): State<AppState>,
         ) -> Redirect {
             if let Some(code) = params.code.as_ref() {
                 if let Some(param_state) = params.state.as_ref() {
                     // nonce can use only once
-                    if let Some(nonce) = state.nonce_set.lock().await.take(param_state) {
-                        match state.client.get_hash_cid_uppercase_from_code(&code).await {
+                    if let Some(nonce) = app.nonce_set.lock().await.take(param_state) {
+                        match app.client.get_hash_cid_uppercase(&code).await {
                             Ok(Some(hash_cid)) => {
                                 // find user and log-in user
                                 Redirect::to("/main")
@@ -102,32 +110,38 @@ This library follow [คู่มือการเชื่อมต่อร�
         ```rust
         use axum::{extract::{Query, State}, response::Redirect};
         use moph_provider_client::request::OauthRedirectParams;
+        use crate::AppState;
 
         // GET /provider
         pub async fn provider_auth_full(
             Query(params): Query<OauthRedirectParams>,
-            State(state): State<crate::AppState>,
+            State(app): State<AppState>,
         ) -> Redirect {
-            if let Some(param_state) = params.state.as_ref() {
-                // nonce can use only once
-                if let Some(nonce) = state.nonce_set.lock().await.take(param_state) {
-                    match state.client.get_all_response(params).await {
-                        Ok(all_data) => {
-                            let has_cid_option = all.get_hash_cid_uppercase();
-                            // read `model::AllResponse` for more information
-                            Redirect::to("/main")
+            if let Some(code) = params.code.as_ref() {
+                if let Some(param_state) = params.state.as_ref() {
+                    // nonce can use only once
+                    if let Some(nonce) = app.nonce_set.lock().await.take(param_state) {
+                        match app.client.get_all_response(code).await {
+                            Ok(all_data) => {
+                                let has_cid_option = all.get_hash_cid_uppercase();
+                                // read `model::AllResponse` for more information
+                                Redirect::to("/main")
+                            }
+                            Err(e) => {
+                                println!("Error: {}", e);
+                                Redirect::to("/index")
+                            }
                         }
-                        Err(e) => {
-                            println!("Error: {}", e);
-                            Redirect::to("/index")
-                        }
+                    } else {
+                        println!("Nonce has been used");
+                        Redirect::to("/index")
                     }
                 } else {
-                    println!("Nonce has been used");
+                    println!("No state");
                     Redirect::to("/index")
                 }
             } else {
-                println!("No state");
+                println!("No code returned");
                 Redirect::to("/index")
             }
         }

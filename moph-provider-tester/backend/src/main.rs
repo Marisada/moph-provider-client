@@ -18,7 +18,7 @@ use tracing_subscriber::{
 #[derive(Clone)]
 pub struct AppState {
     pub client: Arc<MophProviderIdClient>,
-    pub nonce_set: Arc<Mutex<HashSet<String>>>,
+    pub nonce_set: Arc<Mutex<HashSet<u128>>>,
 }
 
 #[tokio::main]
